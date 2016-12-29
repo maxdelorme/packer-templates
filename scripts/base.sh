@@ -1,3 +1,5 @@
+sed -i "s@http://http.us.debian.org@http://ftp.fr.debian.org@" /etc/apt/sources.list
+echo "8.8.8.8" >> /etc/resolv.conf
 # Update the box
 apt-get -y update
 apt-get -y install linux-headers-$(uname -r) build-essential

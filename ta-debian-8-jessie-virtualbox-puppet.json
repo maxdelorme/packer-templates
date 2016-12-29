@@ -1,0 +1,80 @@
+{
+"variables": {
+    "core": "1",
+    "memory": "512",
+    "disk_size": "10140",
+    "ssh_port": "22",
+    "ssh_wait_timeout": "10000s",
+    "iso_url": "http://ftp.proxad.net/mirrors/cdimage.debian.org/debian-cd/8.6.0/amd64/iso-cd/debian-8.6.0-amd64-netinst.iso",
+    "iso_md5": "e9f61bf327db6d8f7cee05a99f2353cc",
+    "vm_name": "debian-860-jessie",
+    "kbd":"fr",
+    "locale":"fr_FR"
+  },
+  "builders": [
+    {
+      "boot_command": [
+        "<esc><wait>",
+        "install <wait>",
+        "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg <wait>",
+        "debian-installer={{user `locale`}} <wait>",
+        "auto <wait>",
+        "locale={{user `locale`}} <wait>",
+        "kbd-chooser/method={{user `kbd`}} <wait>",
+        "netcfg/get_hostname={{ .Name }} <wait>",
+        "netcfg/get_domain=vagrantup.com <wait>",
+        "fb=false <wait>",
+        "debconf/frontend=noninteractive <wait>",
+        "console-setup/ask_detect=false <wait>",
+        "console-keymaps-at/keymap={{user `kbd`}} <wait>",
+        "keyboard-configuration/xkb-keymap={{user `kbd`}} <wait>",
+        "<enter><wait>"
+      ],
+      "disk_size": "{{user `disk_size`}}",
+      "guest_os_type": "Debian_64",
+      "headless": true,
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_md5`}}",
+      "iso_checksum_type": "md5",
+      "iso_url": "{{user `iso_url`}}",
+      "shutdown_command": "echo 'halt -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+      "ssh_password": "vagrant",
+      "ssh_username": "vagrant",
+      "ssh_port": "{{user `ssh_port`}}",
+      "ssh_wait_timeout": "{{user `ssh_wait_timeout`}}",
+      "type": "virtualbox-iso",
+      "vm_name": "{{user `vm_name`}}",
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}"],
+        ["modifyvm", "{{.Name}}", "--cpus", "{{user `core`}}"],
+        ["modifyvm", "{{.Name}}", "--paravirtprovider", "legacy"],
+        ["sharedfolder", "add", "{{.Name}}", "--name", "vagrant", "--hostpath", "/vagrant", "--automount"]
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "output": "{{user `vm_name`}}.box"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "pause_before": "5s",
+      "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+      "override": {
+        "virtualbox-iso": {
+          "scripts": [
+            "scripts/base.sh",
+            "scripts/vagrant.sh",
+            "scripts/virtualbox.sh",
+            "scripts/puppet.sh",
+            "scripts/cleanup.sh"
+          ]
+        }
+      }
+    }
+  ]
+}
+

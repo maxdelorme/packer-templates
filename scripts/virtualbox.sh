@@ -4,8 +4,7 @@ if test -f .vbox_version ; then
     /etc/init.d/virtualbox-ose-guest-utils stop
   fi
 
-  rmmod vboxguest
-  aptitude -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils
+  aptitude -y purge virtualbox-ose-guest-x11 virtualbox-ose-guest-dkms virtualbox-ose-guest-utils && apt-get autoremove && apt-get autoclean
 
   # Install dkms for dynamic compiles
 
@@ -20,6 +19,4 @@ if test -f .vbox_version ; then
   umount /mnt
   rm -f VBoxLinuxAdditions.iso
 
-  # Start the newly build driver
-  /etc/init.d/vboxadd start
 fi
